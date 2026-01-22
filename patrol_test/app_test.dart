@@ -4,6 +4,7 @@ import 'package:patrol/patrol.dart';
 import 'package:patrol_testing/main.dart'; // Ensure this matches your project name
 
 void main() {
+  PatrolBinding.ensureInitialized();
   patrolTest(
     'counter increments correctly when tapped',
     (PatrolIntegrationTester $) async {
