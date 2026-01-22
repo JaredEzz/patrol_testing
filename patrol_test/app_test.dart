@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:patrol_testing/main.dart';
 import 'package:patrol_testing/main.dart' as app;
 
 void main() {
-  PatrolBinding.ensureInitialized();
+  PatrolBinding.ensureInitialized(PlatformAutomator());
   patrolTest(
     'counter increments correctly when tapped',
     ($) async {
