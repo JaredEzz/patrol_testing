@@ -4,7 +4,7 @@ import 'package:patrol/patrol.dart';
 import 'package:patrol_testing/main.dart';
 
 void main() {
-  PatrolBinding.ensureInitialized(PlatformAutomatorWeb());
+  PatrolBinding.ensureInitialized(PatrolBinding.defaultPlatformAutomator());
 
   patrolTest(
     'counter increments correctly when tapped',
