@@ -33,11 +33,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: 'latest'
-
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -55,6 +50,7 @@ jobs:
       - name: Run Patrol Web Tests
         run: |
           # Set up virtual display for headless Chrome
+          export DEBUG=pw:api
           export DISPLAY=:99
           Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           sleep 2
@@ -69,11 +65,23 @@ jobs:
             --verbose \
             --show-flutter-logs \
             --no-hide-test-steps \
-            --web-video=retain-on-failure \
+            #--web-video=retain-on-failure \
             --web-workers=1 \
             --web-headless=true \
             2>&1 | tee test-results/patrol-test-output.log
         shell: bash
+
+      - name: Inspect Playwright tests
+        if: always()
+        run: |
+          echo "=== tests directory ==="
+          ls -R tests || echo "No tests directory"
+
+          echo "=== playwright-report ==="
+          ls -R playwright-report || echo "No playwright report"
+
+          echo "=== test-results ==="
+          ls -R test-results
 
       - name: Collect test artifacts
         run: |
