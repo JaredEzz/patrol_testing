@@ -59,6 +59,9 @@ jobs:
           Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           sleep 2
           
+          # Create tests directory for Playwright (Patrol expects this structure)
+          mkdir -p tests
+          
           # Run Patrol tests with comprehensive logging
           patrol test \
             --device chrome \
@@ -68,7 +71,7 @@ jobs:
             --no-hide-test-steps \
             --web-video=retain-on-failure \
             --web-workers=1 \
-            --web-headless=false \
+            --web-headless=true \
             2>&1 | tee test-results/patrol-test-output.log
         shell: bash
 
