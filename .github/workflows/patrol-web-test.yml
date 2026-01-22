@@ -59,16 +59,6 @@ jobs:
           mkdir -p tests
           
           # Run Patrol tests with comprehensive logging
-#          patrol test \
-#            --device chrome \
-#            --target patrol_test/app_test.dart \
-#            --verbose \
-#            --show-flutter-logs \
-#            --no-hide-test-steps \
-#            #--web-video=retain-on-failure \
-#            --web-workers=1 \
-#            --web-headless=true \
-#            2>&1 | tee test-results/patrol-test-output.log
           patrol test \
             --device chrome \
             --target patrol_test/app_test.dart \
