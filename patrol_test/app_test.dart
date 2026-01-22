@@ -4,7 +4,14 @@ import 'package:patrol/patrol.dart';
 import 'package:patrol_testing/main.dart' as app;
 
 void main() {
-  PatrolBinding.ensureInitialized(PlatformAutomator());
+    final config = PlatformAutomatorConfig(
+        web: const WebAutomatorConfig(),
+      );
+
+  // 2. Initialize with the explicit config
+  PatrolBinding.ensureInitialized(PlatformAutomator(config: config));
+
+
   patrolTest(
     'counter increments correctly when tapped',
     ($) async {
