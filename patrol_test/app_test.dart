@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:patrol_testing/main.dart';
+import 'package:patrol_testing/main.dart' as app;
 
 void main() {
   PatrolBinding.ensureInitialized();
   patrolTest(
     'counter increments correctly when tapped',
     ($) async {
-      await $.pumpWidgetAndSettle(const MyApp());
+      await $.pumpWidgetAndSettle(const app.MyApp());
 
       expect($('0'), findsOneWidget);
       expect($('1'), findsNothing);
@@ -24,7 +25,7 @@ void main() {
   patrolTest(
     'multiple taps increment counter to 3',
     ($) async {
-      await $.pumpWidgetAndSettle(const MyApp());
+      await $.pumpWidgetAndSettle(const app.MyApp());
 
       await $.tap(find.byType(FloatingActionButton));
       await $.tap(find.byType(FloatingActionButton));
@@ -38,7 +39,7 @@ void main() {
   patrolTest(
     'FAIL: incorrect counter value expectation',
     ($) async {
-      await $.pumpWidgetAndSettle(const MyApp());
+      await $.pumpWidgetAndSettle(const app.MyApp());
 
       await $.tap(find.byIcon(Icons.add));
       await $.pumpAndSettle();
