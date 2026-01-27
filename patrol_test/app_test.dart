@@ -4,11 +4,6 @@ import 'package:patrol/patrol.dart';
 import 'package:patrol_testing/main.dart' as app;
 
 void main() {
-   const config = PlatformAutomatorConfig(
-     webConfig: PatrolWebConfig(),
-   );
-
-  PatrolBinding.ensureInitialized(PlatformAutomator(config: config));
   patrolTest(
     'counter increments correctly when tapped',
     ($) async {
@@ -40,7 +35,7 @@ void main() {
   );
 
   patrolTest(
-    'FAIL: incorrect counter value expectation',
+    'incorrect counter value expectation',
     ($) async {
       await $.pumpWidgetAndSettle(const app.MyApp());
 
