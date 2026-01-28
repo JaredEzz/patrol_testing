@@ -62,8 +62,9 @@ jobs:
             --verbose \
             --show-flutter-logs \
             --web-global-timeout=100000 \
-            --web-timeout=60000
-            --dart-define=PATROL_HOST=127.0.0.1
+            --web-timeout=60000 \
+            --dart-define=PATROL_HOST=127.0.0.1 \
+            --dart-define=PLAYWRIGHT_TIMEOUT=90000
         shell: bash
 
       - name: Inspect Playwright tests
