@@ -58,10 +58,10 @@ jobs:
             --device chrome \
             --target patrol_test/app_test.dart \
             --web-headless=true \
-            --web-workers=1 \
             --verbose \
             --show-flutter-logs \
-            --web-global-timeout=100000000
+            --web-global-timeout=100000 \
+            --web-timeout=60000
         shell: bash
 
       - name: Inspect Playwright tests
