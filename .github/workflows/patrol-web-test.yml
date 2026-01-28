@@ -49,25 +49,17 @@ jobs:
 
       - name: Run Patrol Web Tests
         run: |
-          # Set up virtual display for headless Chrome
           export DEBUG=pw:api
           export DISPLAY=:99
-          Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           sleep 2
           
-          # Create tests directory for Playwright (Patrol expects this structure)
           mkdir -p tests
-          
-          # Run Patrol tests with comprehensive logging
           patrol test \
             --device chrome \
             --target patrol_test/app_test.dart \
-            --dart-define=FLUTTER_WEB_USE_SKIA=false \
-            --web-headless=true \
-            --web-workers=1 \
-            --verbose \
-            --show-flutter-logs \
-            --web-global-timeout=100000000
+            --web-renderer html \
+            --web-headless \
+            --verbose
         shell: bash
 
       - name: Inspect Playwright tests
