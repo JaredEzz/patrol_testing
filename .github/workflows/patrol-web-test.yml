@@ -49,17 +49,21 @@ jobs:
 
       - name: Run Patrol Web Tests
         run: |
+          export DEBUG=pw:api
           export DISPLAY=:99
-          export PLAYWRIGHT_TIMEOUT=120000
-
+          export PLAYWRIGHT_TIMEOUT=90000
+          sleep 2
+      
+          mkdir -p tests
           patrol test \
             --device chrome \
             --target patrol_test/app_test.dart \
-            --web-headless \
-            --web-timeout 120000 \
-            --web-global-timeout 600000 \
+            --web-headless=true \
             --verbose \
-            --show-flutter-logs
+            --show-flutter-logs \
+            --web-global-timeout=100000 \
+            --web-timeout=60000
+            --dart-define=PATROL_HOST=127.0.0.1
         shell: bash
 
       - name: Inspect Playwright tests
