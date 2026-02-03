@@ -4,9 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev ]
 
 jobs:
   patrol-web-test:
@@ -50,11 +50,7 @@ jobs:
       - name: Run Patrol Web Tests
         run: |
           export DEBUG=pw:api
-          export DISPLAY=:99
-          export PLAYWRIGHT_TIMEOUT=90000
-          sleep 2
       
-          mkdir -p tests
           patrol test \
             --device chrome \
             --target patrol_test/app_test.dart \
@@ -62,9 +58,7 @@ jobs:
             --verbose \
             --show-flutter-logs \
             --web-global-timeout=100000 \
-            --web-timeout=60000 \
-            --dart-define=PATROL_HOST=127.0.0.1 \
-            --dart-define=PLAYWRIGHT_TIMEOUT=90000
+            --web-timeout=60000
         shell: bash
 
       - name: Inspect Playwright tests
