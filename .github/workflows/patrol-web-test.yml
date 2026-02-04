@@ -1,0 +1,121 @@
+name: Patrol Web Tests
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  patrol-web-test:
+    name: Patrol Web Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.38.1
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Setup Patrol CLI
+        run: dart pub global activate patrol_cli
+
+      - name: Verify Patrol installation
+        run: patrol --version
+
+      - name: Create test results directory
+        run: mkdir -p test-results
+
+      - name: Run Patrol Web Tests
+        run: |
+          export DEBUG=pw:api
+      
+          patrol test \
+            --device chrome \
+            --target patrol_test/app_test.dart \
+            --web-headless=true \
+            --verbose \
+            --show-flutter-logs \
+            --web-global-timeout=100000 \
+            --web-timeout=60000
+        shell: bash
+
+      - name: Inspect Playwright tests
+        if: always()
+        run: |
+          echo "=== tests directory ==="
+          ls -R tests || echo "No tests directory"
+
+          echo "=== playwright-report ==="
+          ls -R playwright-report || echo "No playwright report"
+
+          echo "=== test-results ==="
+          ls -R test-results
+
+      - name: Collect test artifacts
+        run: |
+          # Find and copy all test artifacts
+          find . -name "*.webm" -o -name "*.html" -o -name "*.json" | while read file; do
+            cp "$file" test-results/ 2>/dev/null || true
+          done
+          
+          # Copy any additional Patrol output directories
+          if [ -d "build" ]; then
+            cp -r build test-results/ 2>/dev/null || true
+          fi
+          
+          # List all collected artifacts
+          echo "=== Collected Test Artifacts ==="
+          find test-results -type f | sort
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: patrol-test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Upload test videos (if any)
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: patrol-test-videos
+          path: |
+            test-results/*.webm
+            test-results/**/*.webm
+          retention-days: 7
+
+      - name: Display test summary
+        if: always()
+        run: |
+          echo "=== Patrol Test Summary ==="
+          if [ -f "test-results/patrol-test-output.log" ]; then
+            echo "Test output log size: $(wc -l < test-results/patrol-test-output.log) lines"
+            echo "Last 50 lines of test output:"
+            tail -50 test-results/patrol-test-output.log
+          fi
+          
+          echo "=== Available Artifacts ==="
+          find test-results -type f -exec ls -lh {} \; | sort
