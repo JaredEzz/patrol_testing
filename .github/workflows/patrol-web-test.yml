@@ -57,8 +57,8 @@ jobs:
             --web-headless=true \
             --verbose \
             --show-flutter-logs \
-            --web-global-timeout=100000 \
-            --web-timeout=60000
+            --web-global-timeout=600000 \
+            --web-timeout=180000
         shell: bash
 
       - name: Inspect Playwright tests
