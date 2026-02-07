@@ -58,7 +58,9 @@ jobs:
             --verbose \
             --show-flutter-logs \
             --web-global-timeout=600000 \
-            --web-timeout=180000
+            --web-timeout=180000 \
+            --web-locale=en-US \
+            --web-timezone=America/New_York
         shell: bash
 
       - name: Inspect Playwright tests
