@@ -39,7 +39,7 @@ jobs:
           sudo apt-get install -y xvfb
 
       - name: Setup Patrol CLI
-        run: dart pub global activate patrol_cli
+        run: dart pub global activate --source git https://github.com/JaredEzz/patrol.git --git-path packages/patrol_cli --git-ref fix/headless-timeout
 
       - name: Verify Patrol installation
         run: patrol --version
