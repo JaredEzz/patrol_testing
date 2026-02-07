@@ -39,7 +39,7 @@ jobs:
           sudo apt-get install -y xvfb
 
       - name: Setup Patrol CLI
-        run: dart pub global activate patrol_cli
+        run: dart pub global activate --source git https://github.com/JaredEzz/patrol.git --git-path packages/patrol_cli --git-ref fix/headless-timeout
 
       - name: Verify Patrol installation
         run: patrol --version
@@ -48,6 +48,7 @@ jobs:
         run: mkdir -p test-results
 
       - name: Run Patrol Web Tests
+        id: patrol_test
         run: |
           export DEBUG=pw:api
       
@@ -57,65 +58,105 @@ jobs:
             --web-headless=true \
             --verbose \
             --show-flutter-logs \
-            --web-global-timeout=100000 \
-            --web-timeout=60000
+            --web-global-timeout=600000 \
+            --web-timeout=180000 \
+            --web-locale=en-US \
+            --web-timezone=America/New_York \
+            --web-video=retain-on-failure
         shell: bash
 
-      - name: Inspect Playwright tests
+      - name: Inspect test directories
         if: always()
         run: |
+          echo "=== Current directory ==="
+          pwd
+          
           echo "=== tests directory ==="
-          ls -R tests || echo "No tests directory"
+          ls -la tests 2>/dev/null || echo "No tests directory"
 
-          echo "=== playwright-report ==="
-          ls -R playwright-report || echo "No playwright report"
-
-          echo "=== test-results ==="
-          ls -R test-results
-
-      - name: Collect test artifacts
-        run: |
-          # Find and copy all test artifacts
-          find . -name "*.webm" -o -name "*.html" -o -name "*.json" | while read file; do
-            cp "$file" test-results/ 2>/dev/null || true
-          done
+          echo "=== playwright-report directory ==="
+          ls -la playwright-report 2>/dev/null || echo "No playwright-report directory"
           
-          # Copy any additional Patrol output directories
-          if [ -d "build" ]; then
-            cp -r build test-results/ 2>/dev/null || true
-          fi
-          
-          # List all collected artifacts
-          echo "=== Collected Test Artifacts ==="
-          find test-results -type f | sort
+          echo "=== playwright-report contents ==="
+          find playwright-report -type f 2>/dev/null | head -50 || echo "No files in playwright-report"
 
-      - name: Upload test results
+          echo "=== test-results directory ==="
+          ls -la test-results 2>/dev/null || echo "No test-results directory"
+          
+          echo "=== Looking for video files ==="
+          find . -name "*.webm" -o -name "*.mp4" 2>/dev/null | head -20 || echo "No video files found"
+
+      - name: Upload Playwright HTML Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: patrol-test-results
-          path: test-results/
-          retention-days: 7
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: warn
 
-      - name: Upload test videos (if any)
+      - name: Upload test videos
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: patrol-test-videos
+          name: test-videos
           path: |
-            test-results/*.webm
             test-results/**/*.webm
-          retention-days: 7
+            test-results/**/*.mp4
+            **/test-results/**/*.webm
+            **/test-results/**/*.mp4
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Display failure details
+        if: failure()
+        run: |
+          echo "============================================"
+          echo "         TEST FAILURE DETAILS"
+          echo "============================================"
+          
+          # Show any JSON test results
+          echo ""
+          echo "=== JSON Test Results ==="
+          find . -name "*.json" -path "*/playwright-report/*" -exec echo "--- {} ---" \; -exec cat {} \; 2>/dev/null | head -200 || echo "No JSON results found"
+          
+          # Show test result files
+          echo ""
+          echo "=== Test Result Files ==="
+          find . -path "*/test-results/*" -type f 2>/dev/null | head -50 || echo "No test result files"
+          
+          # If there's an index.html, try to extract useful info
+          echo ""
+          echo "=== Report Index ==="
+          if [ -f "playwright-report/index.html" ]; then
+            echo "Playwright HTML report exists at playwright-report/index.html"
+            echo "Download the 'playwright-report' artifact to view it locally"
+            echo ""
+            echo "To view the report locally:"
+            echo "  1. Download and extract the playwright-report artifact"
+            echo "  2. Run: npx playwright show-report playwright-report"
+            echo "  OR"
+            echo "  2. Open playwright-report/index.html in a browser"
+          else
+            echo "No index.html found in playwright-report"
+          fi
 
       - name: Display test summary
         if: always()
         run: |
-          echo "=== Patrol Test Summary ==="
-          if [ -f "test-results/patrol-test-output.log" ]; then
-            echo "Test output log size: $(wc -l < test-results/patrol-test-output.log) lines"
-            echo "Last 50 lines of test output:"
-            tail -50 test-results/patrol-test-output.log
-          fi
+          echo "============================================"
+          echo "           PATROL TEST SUMMARY"
+          echo "============================================"
           
-          echo "=== Available Artifacts ==="
-          find test-results -type f -exec ls -lh {} \; | sort
+          echo ""
+          echo "=== Artifacts uploaded ==="
+          echo "- playwright-report: HTML test report (download and open index.html)"
+          echo "- test-videos: Video recordings of failed tests (if any)"
+          
+          echo ""
+          echo "=== How to view the HTML report ==="
+          echo "1. Go to the Actions run page"
+          echo "2. Scroll to 'Artifacts' section at the bottom"
+          echo "3. Download 'playwright-report'"
+          echo "4. Extract and open index.html in a browser"
+          echo "   OR run: npx playwright show-report ./playwright-report"

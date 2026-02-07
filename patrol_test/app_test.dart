@@ -35,15 +35,13 @@ void main() {
   );
 
   patrolTest(
-    'incorrect counter value expectation',
+    'counter starts at zero',
     ($) async {
       await $.pumpWidgetAndSettle(const app.MyApp());
 
-      await $.tap(find.byIcon(Icons.add));
-      await $.pumpAndSettle();
-
-      // Intentional failure
-      expect($('5'), findsOneWidget);
+      // Verify initial state
+      expect($('0'), findsOneWidget);
+      expect($(FloatingActionButton), findsOneWidget);
     },
   );
 }

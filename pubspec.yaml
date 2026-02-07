@@ -88,3 +88,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  patrol:
+    git:
+      url: https://github.com/JaredEzz/patrol.git
+      path: packages/patrol
+      ref: fix/headless-timeout
